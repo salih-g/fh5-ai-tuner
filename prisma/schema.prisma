@@ -1,0 +1,144 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Car {
+  id           String          @id @default(cuid())
+  brand        String
+  model        String
+  year         Int
+  performance  CarPerformance?
+  tuningSetups TuningSetup[]
+  createdAt    DateTime        @default(now())
+  updatedAt    DateTime        @updatedAt
+}
+
+model CarPerformance {
+  id           String @id @default(cuid())
+  carId        String @unique
+  car          Car    @relation(fields: [carId], references: [id], onDelete: Cascade)
+  power        Int // HP
+  torque       Int // N-m
+  weight       Int // kg
+  frontWeight  Int // percentage
+  displacement Int // cc
+  drivetrain   String // RWD, AWD, FWD
+  category     String // S2, A, etc.
+  pi           Int // Performance Index
+}
+
+model TuningSetup {
+  id           String             @id @default(cuid())
+  name         String
+  carId        String
+  car          Car                @relation(fields: [carId], references: [id], onDelete: Cascade)
+  tires        TiresSetup?
+  gearing      GearingSetup?
+  alignment    AlignmentSetup?
+  antirollBars AntirollBarsSetup?
+  springs      SpringsSetup?
+  damping      DampingSetup?
+  aero         AeroSetup?
+  braking      BrakingSetup?
+  differential DifferentialSetup?
+  description  String?
+  prompt       String // User's prompt for how they want the car to perform
+  createdAt    DateTime           @default(now())
+  updatedAt    DateTime           @updatedAt
+}
+
+model TiresSetup {
+  id            String      @id @default(cuid())
+  tuningSetupId String      @unique
+  tuningSetup   TuningSetup @relation(fields: [tuningSetupId], references: [id], onDelete: Cascade)
+  frontPressure Float
+  rearPressure  Float
+}
+
+model GearingSetup {
+  id            String      @id @default(cuid())
+  tuningSetupId String      @unique
+  tuningSetup   TuningSetup @relation(fields: [tuningSetupId], references: [id], onDelete: Cascade)
+  finalDrive    Float
+  firstGear     Float
+  secondGear    Float
+  thirdGear     Float
+  fourthGear    Float
+  fifthGear     Float
+  sixthGear     Float
+  seventhGear   Float?
+  eighthGear    Float?
+  ninthGear     Float?
+  tenthGear     Float?
+}
+
+model AlignmentSetup {
+  id            String      @id @default(cuid())
+  tuningSetupId String      @unique
+  tuningSetup   TuningSetup @relation(fields: [tuningSetupId], references: [id], onDelete: Cascade)
+  frontCamber   Float
+  rearCamber    Float
+  frontToe      Float
+  rearToe       Float
+  frontCaster   Float
+}
+
+model AntirollBarsSetup {
+  id            String      @id @default(cuid())
+  tuningSetupId String      @unique
+  tuningSetup   TuningSetup @relation(fields: [tuningSetupId], references: [id], onDelete: Cascade)
+  front         Float
+  rear          Float
+}
+
+model SpringsSetup {
+  id             String      @id @default(cuid())
+  tuningSetupId  String      @unique
+  tuningSetup    TuningSetup @relation(fields: [tuningSetupId], references: [id], onDelete: Cascade)
+  frontStiffness Float
+  rearStiffness  Float
+  frontHeight    Float
+  rearHeight     Float
+}
+
+model DampingSetup {
+  id                    String      @id @default(cuid())
+  tuningSetupId         String      @unique
+  tuningSetup           TuningSetup @relation(fields: [tuningSetupId], references: [id], onDelete: Cascade)
+  frontReboundStiffness Float
+  rearReboundStiffness  Float
+  frontBumpStiffness    Float
+  rearBumpStiffness     Float
+}
+
+model AeroSetup {
+  id             String      @id @default(cuid())
+  tuningSetupId  String      @unique
+  tuningSetup    TuningSetup @relation(fields: [tuningSetupId], references: [id], onDelete: Cascade)
+  frontDownforce Float
+  rearDownforce  Float
+}
+
+model BrakingSetup {
+  id            String      @id @default(cuid())
+  tuningSetupId String      @unique
+  tuningSetup   TuningSetup @relation(fields: [tuningSetupId], references: [id], onDelete: Cascade)
+  brakeBalance  Float // percentage front
+  brakePressure Float // percentage
+}
+
+model DifferentialSetup {
+  id            String      @id @default(cuid())
+  tuningSetupId String      @unique
+  tuningSetup   TuningSetup @relation(fields: [tuningSetupId], references: [id], onDelete: Cascade)
+  acceleration  Float // percentage
+  deceleration  Float // percentage
+}
