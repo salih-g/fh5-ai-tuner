@@ -1,4 +1,6 @@
-import React, { useState } from 'react';
+'use client';
+
+import React, { useEffect, useState } from 'react';
 import { useTuningStore } from '@/lib/store/tuning-store';
 import axios from 'axios';
 import { toast } from 'react-toastify';
@@ -15,8 +17,13 @@ export default function TuningResults() {
     generationStatus,
     setGenerationStatus,
   } = useTuningStore();
-  const [showFeedbackForm, setShowFeedbackForm] = useState(false);
+  const [showFeedbackForm, setShowFeedbackForm] = useState<boolean>(false);
   const [savedSetupId, setSavedSetupId] = useState<string | null>(null);
+  const [isClient, setIsClient] = useState<boolean>(false);
+
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
 
   const {
     register,
@@ -30,6 +37,10 @@ export default function TuningResults() {
       feedback: '',
     },
   });
+
+  if (!isClient) {
+    return null;
+  }
 
   if (generationStatus === 'loading') {
     return (

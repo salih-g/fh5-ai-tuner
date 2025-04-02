@@ -1,3 +1,5 @@
+'use client';
+
 import React from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -77,7 +79,11 @@ export default function TuningPromptForm() {
       </p>
 
       <form onSubmit={handleSubmit(onSubmit)} className='space-y-4'>
-        <input type='hidden' {...register('carId')} value={currentCar.id} />
+        <input
+          type='hidden'
+          {...register('carId')}
+          defaultValue={currentCar.id}
+        />
 
         <div>
           <label className='block text-sm font-medium text-gray-700'>
