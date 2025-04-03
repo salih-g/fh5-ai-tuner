@@ -26,6 +26,7 @@ export default function TuningPromptForm() {
       carId: '',
       prompt: '',
       name: '',
+      setupType: 'Genel',
     },
   });
 
@@ -54,6 +55,7 @@ export default function TuningPromptForm() {
           performance: currentCar.performance,
         },
         prompt: data.prompt,
+        setupType: data.setupType,
       });
 
       console.log('AI yanıtı:', tuningResponse); // Debug için AI yanıtını kontrol et
@@ -90,34 +92,87 @@ export default function TuningPromptForm() {
         {/* Hidden input'u sadece register ile kullan, doğrudan value atama */}
         <input type='hidden' {...register('carId')} />
 
-        <div>
-          <label className='block text-sm font-medium text-gray-700'>
-            Setup İsmi
-          </label>
-          <input
-            type='text'
-            {...register('name')}
-            placeholder='Örn: Nürburgring Hızlı Tur Setup'
-            className='mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm'
-          />
-          {errors.name && (
-            <p className='text-red-600 text-sm mt-1'>{errors.name.message}</p>
-          )}
+        <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
+          <div>
+            <label className='block text-sm font-medium text-gray-700'>
+              Setup İsmi
+            </label>
+            <input
+              type='text'
+              {...register('name')}
+              placeholder='Örn: Nürburgring Hızlı Tur Setup'
+              className='mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm'
+            />
+            {errors.name && (
+              <p className='text-red-600 text-sm mt-1'>{errors.name.message}</p>
+            )}
+          </div>
+
+          <div>
+            <label className='block text-sm font-medium text-gray-700'>
+              Setup Tipi
+            </label>
+            <select
+              {...register('setupType')}
+              className='mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm'
+            >
+              <option value='Pist'>Pist (Circuit)</option>
+              <option value='Ralli'>Ralli (Rally)</option>
+              <option value='Drift'>Drift</option>
+              <option value='Drag'>Drag</option>
+              <option value='Offroad'>Offroad</option>
+              <option value='Cruise'>Cruise / Seyir</option>
+              <option value='Genel'>Genel (Çok Amaçlı)</option>
+            </select>
+            {errors.setupType && (
+              <p className='text-red-600 text-sm mt-1'>
+                {errors.setupType.message}
+              </p>
+            )}
+          </div>
         </div>
 
         <div>
           <label className='block text-sm font-medium text-gray-700'>
-            Tuning İsteğiniz
+            Tuning İsteğiniz (Ne tür bir performans istediğinizi detaylandırın)
           </label>
           <textarea
             {...register('prompt')}
             rows={5}
-            placeholder='Aracın nasıl davranmasını istediğinizi açıklayın. Örn: Nürburgring pistinde hızlı turlar atmak için virajlarda dengeli ve stabil bir setup istiyorum. Viraj çıkışlarında iyi çekiş sağlamalı.'
+            placeholder='Aracın nasıl davranmasını istediğinizi açıklayın. Örn: Nürburgring pistinde hızlı turlar atmak için virajlarda dengeli ve stabil bir setup istiyorum. Viraj çıkışlarında iyi çekiş sağlamalı. Aracın understeer (önden kayma) eğilimini azaltmak istiyorum.'
             className='mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm'
           />
           {errors.prompt && (
             <p className='text-red-600 text-sm mt-1'>{errors.prompt.message}</p>
           )}
+        </div>
+
+        <div className='p-4 bg-blue-50 rounded-md border border-blue-200'>
+          <h3 className='text-blue-800 font-medium mb-2'>Öneriler:</h3>
+          <p className='text-blue-700 text-sm'>
+            Daha iyi sonuçlar için, tuning isteğinizde şu bilgileri paylaşmanız
+            faydalı olabilir:
+          </p>
+          <ul className='text-blue-600 text-sm list-disc pl-5 mt-2 space-y-1'>
+            <li>
+              Aracın hangi koşullarda kullanılacağı (yağmurlu, kuru, offroad,
+              vb.)
+            </li>
+            <li>
+              Aradığınız kullanım hissi (kararlı, tepkili, agresif, dengeli)
+            </li>
+            <li>
+              Olumlu bulduğunuz mevcut özellikler ve değiştirmek istediğiniz
+              davranışlar
+            </li>
+            <li>
+              Virajlarda yaşadığınız sorunlar (önden kayma, arkadan kayma, vb.)
+            </li>
+            <li>
+              Performansın en önemli olduğu alanlar (hızlanma, fren, stabilite,
+              maksimum hız)
+            </li>
+          </ul>
         </div>
 
         <div className='mt-6'>

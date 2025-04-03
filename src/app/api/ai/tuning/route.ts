@@ -19,7 +19,7 @@ export async function POST(req: NextRequest) {
 
     // AI servisine gönderilecek verileri hazırla
     const message = `
-    Bu bir Forza Horizon 5 araç tuning talebidir. Lütfen aşağıdaki araç için belirtilen prompt'a göre bir tuning ayarı oluştur:
+    Bu bir Forza Horizon 5 araç tuning talebidir. Lütfen aşağıdaki araç için belirtilen prompt'a göre detaylı bir tuning ayarı oluştur:
     
     Araç Bilgileri:
     Marka: ${car.brand}
@@ -29,8 +29,14 @@ export async function POST(req: NextRequest) {
     Tork: ${car.performance.torque} N-m
     Ağırlık: ${car.performance.weight} kg
     Ön Ağırlık Dağılımı: ${car.performance.frontWeight}%
+    Arka Ağırlık Dağılımı: ${
+      car.performance.rearWeight || 100 - car.performance.frontWeight
+    }%
     Motor Hacmi: ${car.performance.displacement} cc
     Çekiş Sistemi: ${car.performance.drivetrain}
+    Motor Konumu: ${car.performance.enginePosition || 'Bilinmiyor'}
+    Besleme Tipi: ${car.performance.aspiration || 'Bilinmiyor'}
+    Silindir Sayısı: ${car.performance.cylinders || 'Bilinmiyor'}
     Kategori: ${car.performance.category}
     Performans İndeksi: ${car.performance.pi}
     
@@ -38,18 +44,109 @@ export async function POST(req: NextRequest) {
     
     Lütfen şu formatla bir JSON yanıtı oluştur:
     {
-      "tires": { "frontPressure": x.x, "rearPressure": x.x },
-      "gearing": { "finalDrive": x.xx, "firstGear": x.xx, ... },
-      "alignment": { "frontCamber": x.x, "rearCamber": x.x, ... },
-      "antirollBars": { "front": xx.x, "rear": xx.x },
-      "springs": { "frontStiffness": xx.x, "rearStiffness": xx.x, "frontHeight": xx.x, "rearHeight": xx.x },
-      "damping": { "frontReboundStiffness": xx.x, ... },
-      "aero": { "frontDownforce": xxx, "rearDownforce": xxx },
-      "braking": { "brakeBalance": xx, "brakePressure": xx },
-      "differential": { "acceleration": xx, "deceleration": xx },
-      "explanation": "Tuning'in neden bu şekilde yapıldığına dair açıklama"
+      "tires": {
+        "frontPressure": x.x, 
+        "rearPressure": x.x,
+        "frontWidth": xxx (opsiyonel, mm cinsinden),
+        "rearWidth": xxx (opsiyonel, mm cinsinden),
+        "frontProfile": xx (opsiyonel, % cinsinden),
+        "rearProfile": xx (opsiyonel, % cinsinden),
+        "frontRimSize": xx (opsiyonel, inç cinsinden),
+        "rearRimSize": xx (opsiyonel, inç cinsinden),
+        "compound": "lastik tipi" (opsiyonel, Stock, Street, Sport, Race, Drag, Rally, Drift, Offroad)
+      },
+      "gearing": {
+        "finalDrive": x.xx, 
+        "firstGear": x.xx, 
+        "secondGear": x.xx, 
+        "thirdGear": x.xx, 
+        "fourthGear": x.xx, 
+        "fifthGear": x.xx, 
+        "sixthGear": x.xx (opsiyonel), 
+        "seventhGear": x.xx (opsiyonel), 
+        "eighthGear": x.xx (opsiyonel), 
+        "ninthGear": x.xx (opsiyonel), 
+        "tenthGear": x.xx (opsiyonel),
+        "gearCount": x (opsiyonel),
+        "topSpeed": xxx (opsiyonel, km/h cinsinden)
+      },
+      "alignment": {
+        "frontCamber": x.x, 
+        "rearCamber": x.x, 
+        "frontToe": x.x, 
+        "rearToe": x.x, 
+        "frontCaster": x.x
+      },
+      "antirollBars": {
+        "front": xx.x, 
+        "rear": xx.x
+      },
+      "springs": {
+        "frontStiffness": xx.x, 
+        "rearStiffness": xx.x, 
+        "frontHeight": xx.x, 
+        "rearHeight": xx.x,
+        "springType": "yay tipi" (opsiyonel, Stock, Race, Rally, Drift, Offroad)
+      },
+      "damping": {
+        "frontReboundStiffness": xx.x,
+        "rearReboundStiffness": xx.x,
+        "frontBumpStiffness": xx.x,
+        "rearBumpStiffness": xx.x
+      },
+      "aero": {
+        "frontDownforce": xxx,
+        "rearDownforce": xxx
+      },
+      "braking": {
+        "brakeBalance": xx,
+        "brakePressure": xx,
+        "brakeType": "fren tipi" (opsiyonel, Stock, Street, Race, Rally, Drift)
+      },
+      "differential": {
+        ${
+          car.performance.drivetrain === 'AWD' ||
+          car.performance.drivetrain === 'FWD'
+            ? '"frontAccel": xx,'
+            : ''
+        }
+        ${
+          car.performance.drivetrain === 'AWD' ||
+          car.performance.drivetrain === 'FWD'
+            ? '"frontDecel": xx,'
+            : ''
+        }
+        "rearAccel": xx,
+        "rearDecel": xx,
+        ${car.performance.drivetrain === 'AWD' ? '"center": xx,' : ''}
+        "diffType": "diferansiyel tipi" (opsiyonel, Stock, Race, Rally, Drift, Offroad)
+      },
+      "engine": {
+        "intakeLevel": x (opsiyonel, 0-5 arası),
+        "exhaustLevel": x (opsiyonel, 0-5 arası),
+        "camshaftLevel": x (opsiyonel, 0-5 arası),
+        "valvesLevel": x (opsiyonel, 0-5 arası),
+        "engineBlockLevel": x (opsiyonel, 0-5 arası),
+        "pistonLevel": x (opsiyonel, 0-5 arası),
+        "turboLevel": x (opsiyonel, 0-5 arası, ${
+          car.performance.aspiration?.includes('Turbo')
+            ? 'mevcut besleme türü Turbo/Twin-turbo'
+            : 'NA/Supercharged besleme'
+        }),
+        "intercoolerLevel": x (opsiyonel, 0-5 arası),
+        "oilLevel": x (opsiyonel, 0-5 arası),
+        "flyWheelLevel": x (opsiyonel, 0-5 arası),
+        "ignitionLevel": x (opsiyonel, 0-5 arası)
+      },
+      "explanation": "Tuning'in neden bu şekilde yapıldığına dair detaylı açıklama"
     }
     
+    FH5'teki gerçek tuning değerlerini bildiğinden emin ol:
+    - Çekiş tipine göre (FWD, RWD, AWD) uygun diferansiyel ayarları ver
+    - Ön/arka ağırlık dağılımına göre uygun yay ve antiroll bar değerleri belirle
+    - Motor konumuna göre (Ön, Orta, Arka) uygun ağırlık transferi ayarları ver
+    - Körükörüne rakamlar verme, gerçekçi, dengeli ve kullanıcının isteğine cevap veren bir setup yarat
+
     Sadece JSON döndür, başka bir açıklama ekleme.
     `;
 

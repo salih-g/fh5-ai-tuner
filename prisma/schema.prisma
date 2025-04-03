@@ -22,17 +22,23 @@ model Car {
 }
 
 model CarPerformance {
-  id           String @id @default(cuid())
-  carId        String @unique
-  car          Car    @relation(fields: [carId], references: [id], onDelete: Cascade)
-  power        Int // HP
-  torque       Int // N-m
-  weight       Int // kg
-  frontWeight  Int // percentage
-  displacement Int // cc
-  drivetrain   String // RWD, AWD, FWD
-  category     String // S2, A, etc.
-  pi           Int // Performance Index
+  id             String @id @default(cuid())
+  carId          String @unique
+  car            Car    @relation(fields: [carId], references: [id], onDelete: Cascade)
+  power          Int // HP
+  torque         Int // N-m
+  weight         Int // kg
+  frontWeight    Int // percentage
+  rearWeight     Int // percentage 
+  displacement   Int // cc
+  drivetrain     String // RWD, AWD, FWD
+  category       String // S2, A, etc.
+  pi             Int // Performance Index
+  enginePosition String // Front, Mid, Rear
+  aspiration     String // NA, Turbo, Twin-turbo, Supercharged
+  cylinders      Int? // Number of cylinders
+  stockTopSpeed  Int? // km/h
+  stockAccel     Float? // 0-100 km/h in seconds
 }
 
 model TuningSetup {
@@ -49,6 +55,7 @@ model TuningSetup {
   aero         AeroSetup?
   braking      BrakingSetup?
   differential DifferentialSetup?
+  engine       EngineSetup? // Yeni eklendi
   description  String?
   prompt       String // User's prompt for how they want the car to perform
   createdAt    DateTime           @default(now())
@@ -61,6 +68,13 @@ model TiresSetup {
   tuningSetup   TuningSetup @relation(fields: [tuningSetupId], references: [id], onDelete: Cascade)
   frontPressure Float
   rearPressure  Float
+  frontWidth    Float? // mm, lastik genişliği
+  rearWidth     Float? // mm, lastik genişliği
+  frontProfile  Int? // lastik profil yüzdesi
+  rearProfile   Int? // lastik profil yüzdesi
+  frontRimSize  Int? // inç cinsinden jant boyutu
+  rearRimSize   Int? // inç cinsinden jant boyutu
+  compound      String? // Stock, Street, Sport, Race, Drag, etc.
 }
 
 model GearingSetup {
@@ -73,11 +87,13 @@ model GearingSetup {
   thirdGear     Float
   fourthGear    Float
   fifthGear     Float
-  sixthGear     Float
+  sixthGear     Float? // Opsiyonel olabilir
   seventhGear   Float?
   eighthGear    Float?
   ninthGear     Float?
   tenthGear     Float?
+  gearCount     Int // Toplam vites sayısı
+  topSpeed      Int? // km/h olarak, tuning sonrası
 }
 
 model AlignmentSetup {
@@ -107,6 +123,7 @@ model SpringsSetup {
   rearStiffness  Float
   frontHeight    Float
   rearHeight     Float
+  springType     String? // Stock, Race, Rally, etc.
 }
 
 model DampingSetup {
@@ -133,12 +150,34 @@ model BrakingSetup {
   tuningSetup   TuningSetup @relation(fields: [tuningSetupId], references: [id], onDelete: Cascade)
   brakeBalance  Float // percentage front
   brakePressure Float // percentage
+  brakeType     String? // Stock, Street, Race, etc.
 }
 
 model DifferentialSetup {
   id            String      @id @default(cuid())
   tuningSetupId String      @unique
   tuningSetup   TuningSetup @relation(fields: [tuningSetupId], references: [id], onDelete: Cascade)
-  acceleration  Float // percentage
-  deceleration  Float // percentage
+  frontAccel    Float? // AWD/FWD için
+  frontDecel    Float? // AWD/FWD için
+  rearAccel     Float // percentage
+  rearDecel     Float // percentage
+  center        Float? // AWD için merkez differansiyel
+  diffType      String? // Stock, Race, Rally, Drift, etc.
+}
+
+model EngineSetup {
+  id               String      @id @default(cuid())
+  tuningSetupId    String      @unique
+  tuningSetup      TuningSetup @relation(fields: [tuningSetupId], references: [id], onDelete: Cascade)
+  intakeLevel      Int? // Emme sistemi seviyesi 
+  exhaustLevel     Int? // Egzoz sistemi seviyesi
+  camshaftLevel    Int? // Kam mili seviyesi
+  valvesLevel      Int? // Supap seviyesi
+  engineBlockLevel Int? // Motor bloğu seviyesi
+  pistonLevel      Int? // Piston seviyesi
+  turboLevel       Int? // Turbo seviyesi (varsa)
+  intercoolerLevel Int? // Intercooler seviyesi (varsa)
+  oilLevel         Int? // Yağ soğutma seviyesi
+  flyWheelLevel    Int? // Volan seviyesi
+  ignitionLevel    Int? // Ateşleme sistemi seviyesi
 }
