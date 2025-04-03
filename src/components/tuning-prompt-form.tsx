@@ -1,6 +1,4 @@
-'use client';
-
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { TuningPrompt, tuningPromptSchema } from '@/lib/validations/car';
@@ -21,6 +19,7 @@ export default function TuningPromptForm() {
     handleSubmit,
     formState: { errors },
     reset,
+    setValue,
   } = useForm<TuningPrompt>({
     resolver: zodResolver(tuningPromptSchema),
     defaultValues: {
@@ -30,6 +29,13 @@ export default function TuningPromptForm() {
     },
   });
 
+  // Önemli: carId değerini currentCar değiştiğinde otomatik güncelle
+  useEffect(() => {
+    if (currentCar) {
+      setValue('carId', currentCar.id);
+    }
+  }, [currentCar, setValue]);
+
   const onSubmit = async (data: TuningPrompt) => {
     if (!currentCar) {
       toast.error('Lütfen önce bir araç seçin');
@@ -37,6 +43,7 @@ export default function TuningPromptForm() {
     }
 
     try {
+      console.log('Form verileri:', data); // Debug için form verilerini kontrol et
       setGenerationStatus('loading');
 
       const tuningResponse = await generateTuning({
@@ -49,6 +56,7 @@ export default function TuningPromptForm() {
         prompt: data.prompt,
       });
 
+      console.log('AI yanıtı:', tuningResponse); // Debug için AI yanıtını kontrol et
       setCurrentTuning(tuningResponse);
       setGenerationStatus('success');
       toast.success('Tuning başarıyla oluşturuldu!');
@@ -79,11 +87,8 @@ export default function TuningPromptForm() {
       </p>
 
       <form onSubmit={handleSubmit(onSubmit)} className='space-y-4'>
-        <input
-          type='hidden'
-          {...register('carId')}
-          defaultValue={currentCar.id}
-        />
+        {/* Hidden input'u sadece register ile kullan, doğrudan value atama */}
+        <input type='hidden' {...register('carId')} />
 
         <div>
           <label className='block text-sm font-medium text-gray-700'>
